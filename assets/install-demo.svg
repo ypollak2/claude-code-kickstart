@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 620">
+  <style>
+    .bg { fill: #1e1e2e; }
+    .titlebar { fill: #313244; }
+    .btn-red { fill: #f38ba8; }
+    .btn-yellow { fill: #f9e2af; }
+    .btn-green { fill: #a6e3a1; }
+    .text { font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; font-size: 13px; }
+    .prompt { fill: #89b4fa; }
+    .cmd { fill: #cdd6f4; }
+    .cyan { fill: #89dceb; }
+    .green { fill: #a6e3a1; }
+    .yellow { fill: #f9e2af; }
+    .blue { fill: #89b4fa; }
+    .bold { font-weight: bold; }
+    .dim { fill: #6c7086; }
+    .white { fill: #cdd6f4; }
+    .title-text { fill: #cdd6f4; font-family: 'SF Mono', monospace; font-size: 13px; }
+  </style>
+
+  <!-- Window frame -->
+  <rect class="bg" width="820" height="620" rx="10"/>
+  <rect class="titlebar" width="820" height="36" rx="10"/>
+  <rect class="titlebar" x="0" y="26" width="820" height="10"/>
+  <circle class="btn-red" cx="20" cy="18" r="6"/>
+  <circle class="btn-yellow" cx="40" cy="18" r="6"/>
+  <circle class="btn-green" cx="60" cy="18" r="6"/>
+  <text class="title-text" x="370" y="22" text-anchor="middle">Terminal — zsh</text>
+
+  <!-- Content -->
+  <g transform="translate(16, 52)">
+    <!-- Prompt line -->
+    <text class="text prompt" y="0">$</text>
+    <text class="text cmd" x="16" y="0">./install.sh</text>
+
+    <!-- Header box -->
+    <text class="text cyan bold" y="28">  ╔══════════════════════════════════════════╗</text>
+    <text class="text cyan bold" y="46">  ║     claude-code-kickstart installer      ║</text>
+    <text class="text cyan bold" y="64">  ║  Power user setup in one command.        ║</text>
+    <text class="text cyan bold" y="82">  ╚══════════════════════════════════════════╝</text>
+
+    <!-- Step 1 -->
+    <text class="text white bold" y="110">[1/8] Pre-flight checks</text>
+    <text class="text green" y="128">    OK  Claude Code CLI found: 2.1.73</text>
+    <text class="text green" y="146">    OK  jq available</text>
+
+    <!-- Step 2 -->
+    <text class="text white bold" y="174">[2/8] Profile selection</text>
+    <text class="text blue" y="192">  INFO  Auto-detected project type: web-dev</text>
+    <text class="text blue" y="210">  INFO  Selected profile: web-dev</text>
+
+    <!-- Step 3-4 -->
+    <text class="text white bold" y="238">[3/8] Backing up existing config</text>
+    <text class="text green" y="256">    OK  Backed up settings.json</text>
+
+    <text class="text white bold" y="284">[4/8] Installing configurations</text>
+    <text class="text green" y="302">    OK  Merged settings.json</text>
+    <text class="text green" y="320">    OK  Installed hooks</text>
+    <text class="text green" y="338">    OK  Installed agents</text>
+    <text class="text green" y="356">    OK  Installed keybindings</text>
+
+    <!-- Step 8 -->
+    <text class="text white bold" y="384">[8/8] Verifying installation</text>
+    <text class="text green" y="402">    OK  settings.json exists</text>
+    <text class="text green" y="420">    OK  Hooks configured</text>
+    <text class="text green" y="438">    OK  12 agents installed</text>
+    <text class="text green" y="456">    OK  3 MCP servers configured</text>
+
+    <!-- Success -->
+    <text class="text green bold" y="488">  ══════════════════════════════════════════</text>
+    <text class="text green bold" y="506">   Installation complete!</text>
+    <text class="text green bold" y="524">  ══════════════════════════════════════════</text>
+
+    <!-- Cursor -->
+    <text class="text prompt" y="552">$</text>
+    <rect x="16" y="540" width="8" height="16" fill="#cdd6f4" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0;0.7" dur="1.2s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>

@@ -5,12 +5,16 @@
 Every Claude Code resource is a catalog — "here's 200 things, good luck." This repo is different. It's an **opinionated starter kit** that installs a tested, curated setup in under a minute.
 
 ```bash
-git clone https://github.com/yalipollak/claude-code-kickstart
+git clone https://github.com/ypollak2/claude-code-kickstart
 cd claude-code-kickstart
 ./install.sh
 ```
 
 That's it. You'll get a profile picker, automatic backup of your existing config, and a clean install of everything below.
+
+<p align="center">
+  <img src="assets/install-demo.svg" alt="Installation demo" width="720">
+</p>
 
 ---
 
@@ -169,12 +173,27 @@ Then run `cchealth` to verify everything is working.
 
 ---
 
+## Documentation
+
+| Doc | What's in it |
+|-----|-------------|
+| [WHY.md](docs/WHY.md) | Why every choice was made — the reasoning behind each component |
+| [CUSTOMIZE.md](docs/CUSTOMIZE.md) | How to modify the setup for your needs |
+| [RECIPES.md](docs/RECIPES.md) | 10 end-to-end workflows: onboarding, TDD, PR review, migrations |
+| [TIPS.md](docs/TIPS.md) | Power user techniques — agent chaining, token efficiency, hook tricks |
+| [FAQ.md](docs/FAQ.md) | Common questions about profiles, agents, hooks, and MCP servers |
+| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Quick fixes for install issues and runtime problems |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+
+---
+
 ## Project Structure
 
 ```
 claude-code-kickstart/
 ├── install.sh                        # One command setup with auto-detect
 ├── uninstall.sh                      # Clean removal with backup restore
+├── CHANGELOG.md                      # Version history
 ├── profiles/
 │   ├── essential/                    # Base config (always installed)
 │   │   ├── settings.json             # Permissions, privacy, thinking
@@ -182,33 +201,26 @@ claude-code-kickstart/
 │   │   ├── keybindings.json          # Power user shortcuts
 │   │   ├── mcp-servers.json          # Context7, Playwright, Sequential Thinking
 │   │   ├── CLAUDE.md                 # Starter template
-│   │   └── agents/                   # 11 purpose-built agents
-│   │       ├── code-reviewer.md
-│   │       ├── planner.md
-│   │       ├── security-auditor.md
-│   │       ├── debugger.md
-│   │       ├── test-writer.md
-│   │       ├── refactorer.md
-│   │       ├── doc-writer.md
-│   │       ├── pr-reviewer.md
-│   │       ├── performance-analyzer.md
-│   │       ├── migrator.md
-│   │       ├── git-assistant.md
-│   │       └── api-designer.md
+│   │   └── agents/                   # 12 purpose-built agents
 │   ├── web-dev/                      # JS/TS ecosystem
 │   ├── python/                       # Python ecosystem
-│   ├── fullstack/                    # Both
 │   ├── rust/                         # Cargo + Rust reviewer agent
 │   ├── go/                           # Go tools + Go reviewer agent
 │   ├── devops/                       # Docker/K8s/Terraform + infra reviewer
 │   ├── data-science/                 # Jupyter/pandas + data analyst agent
 │   ├── mobile/                       # React Native/Flutter/Xcode
 │   └── privacy-first/                # Hardened security
+├── assets/
+│   └── install-demo.svg              # Terminal screenshot for README
 ├── shell/
 │   └── aliases.sh                    # 20+ commands with tab completion
 └── docs/
     ├── WHY.md                        # Why every choice was made
-    └── CUSTOMIZE.md                  # How to modify for your needs
+    ├── CUSTOMIZE.md                  # How to modify for your needs
+    ├── RECIPES.md                    # 10 end-to-end workflows
+    ├── TIPS.md                       # Power user techniques
+    ├── FAQ.md                        # Common questions answered
+    └── TROUBLESHOOTING.md            # Quick fixes for common issues
 ```
 
 ---
