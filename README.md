@@ -42,7 +42,7 @@ Every MCP server eats context tokens just to exist. We picked the 3 that earn th
 | **Block sensitive files** | Stops Claude from editing .env, credentials, private keys. |
 | **Desktop notifications** | Get notified when long tasks finish (macOS + Linux). |
 
-### 11 Purpose-Built Agents
+### 15 Purpose-Built Agents
 
 | Agent | Model | Access | Purpose |
 |-------|-------|--------|---------|
@@ -58,8 +58,22 @@ Every MCP server eats context tokens just to exist. We picked the 3 that earn th
 | **migrator** | Opus | Full | Upgrades dependencies and migrates frameworks safely |
 | **git-assistant** | Sonnet | Read-only | Complex git ops — rebasing, conflict resolution, bisect |
 | **api-designer** | Opus | Full | Designs consistent REST/GraphQL APIs with proper contracts |
+| **accessibility-checker** | Sonnet | Read-only | WCAG compliance, ARIA, keyboard nav, color contrast |
+| **dependency-auditor** | Sonnet | Read-only | Outdated packages, CVEs, unused deps, license issues |
+| **onboarder** | Sonnet | Read-only | Maps unfamiliar codebases — stack, structure, patterns, workflows |
 
-Profile-specific agents are also included (Rust reviewer, Go reviewer, infra reviewer, data analyst).
+Profile-specific agents: Rust reviewer, Go reviewer, Java reviewer, Laravel reviewer, infra reviewer, data analyst.
+
+### 6 Slash Command Skills
+
+| Skill | What it does |
+|-------|-------------|
+| **/review** | Quick code review of staged/unstaged changes |
+| **/test** | Run tests, report results, fix failures |
+| **/security-scan** | Comprehensive security audit (code + dependencies) |
+| **/onboard** | Map an unfamiliar codebase and generate CLAUDE.md |
+| **/dep-check** | Audit dependencies: outdated, vulnerable, unused |
+| **/deploy-check** | Pre-deployment checklist: tests, build, security, env, migrations |
 
 ### Privacy-Respecting Defaults
 
@@ -119,10 +133,18 @@ Pick a profile during install, or pass `--profile <name>`:
 | **go** | + go tools/golangci-lint, **Go reviewer agent** |
 | **devops** | + Docker/K8s/Terraform/Helm, **infra reviewer agent**, destructive ops blocked |
 | **data-science** | + jupyter/pandas/DVC, **data analyst agent** |
+| **java** | + Maven/Gradle/Spring Boot, **Java reviewer agent**, Spotless auto-format |
+| **php** | + Composer/Laravel/Artisan, **Laravel reviewer agent**, Pint auto-format |
 | **mobile** | + React Native/Expo/Flutter/Xcode/Gradle |
 | **privacy-first** | + Hardened credential lockdown, all telemetry disabled |
 
 Profiles **stack**: essential is always the base, your chosen profile adds on top.
+
+Each language profile includes:
+- **settings.json** — tool permissions for that ecosystem
+- **hooks.json** — language-specific auto-format + lockfile protection
+- **CLAUDE.md** — starter template with stack, commands, architecture, constraints
+- **agents/** — language-specific reviewer agent (where applicable)
 
 ### Auto-detect
 
@@ -133,7 +155,7 @@ cd your-project
 /path/to/claude-code-kickstart/install.sh --auto
 ```
 
-It reads `package.json`, `Cargo.toml`, `go.mod`, `requirements.txt`, `Dockerfile`, etc. to suggest the right profile.
+It reads `package.json`, `Cargo.toml`, `go.mod`, `pom.xml`, `composer.json`, `requirements.txt`, `Dockerfile`, etc. to suggest the right profile.
 
 ---
 
@@ -201,15 +223,18 @@ claude-code-kickstart/
 │   │   ├── keybindings.json          # Power user shortcuts
 │   │   ├── mcp-servers.json          # Context7, Playwright, Sequential Thinking
 │   │   ├── CLAUDE.md                 # Starter template
-│   │   └── agents/                   # 12 purpose-built agents
-│   ├── web-dev/                      # JS/TS ecosystem
-│   ├── python/                       # Python ecosystem
-│   ├── rust/                         # Cargo + Rust reviewer agent
-│   ├── go/                           # Go tools + Go reviewer agent
-│   ├── devops/                       # Docker/K8s/Terraform + infra reviewer
-│   ├── data-science/                 # Jupyter/pandas + data analyst agent
-│   ├── mobile/                       # React Native/Flutter/Xcode
-│   └── privacy-first/                # Hardened security
+│   │   ├── agents/                   # 15 purpose-built agents
+│   │   └── skills/                   # 6 slash command skills
+│   ├── web-dev/                      # JS/TS: settings, hooks, CLAUDE.md template
+│   ├── python/                       # Python: settings, hooks, CLAUDE.md template
+│   ├── rust/                         # Rust: settings, hooks, CLAUDE.md, reviewer agent
+│   ├── go/                           # Go: settings, hooks, CLAUDE.md, reviewer agent
+│   ├── java/                         # Java: settings, hooks, CLAUDE.md, reviewer agent
+│   ├── php/                          # PHP: settings, hooks, CLAUDE.md, reviewer agent
+│   ├── devops/                       # DevOps: settings, CLAUDE.md, infra reviewer
+│   ├── data-science/                 # DS: settings, CLAUDE.md, data analyst agent
+│   ├── mobile/                       # Mobile: settings
+│   └── privacy-first/                # Hardened security settings
 ├── assets/
 │   └── install-demo.svg              # Terminal screenshot for README
 ├── shell/

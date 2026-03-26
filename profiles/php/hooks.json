@@ -1,0 +1,24 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.php) if [ -f './vendor/bin/pint' ]; then ./vendor/bin/pint \"$FILE\" -q 2>/dev/null || true; fi;; esac"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in composer.lock) echo 'BLOCKED: Do not edit composer.lock directly. Use composer require / composer update instead.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ]
+}

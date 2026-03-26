@@ -1,0 +1,24 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.rs) rustfmt \"$FILE\" 2>/dev/null || true; cargo clippy --quiet 2>&1 | head -20 || true;; esac"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in Cargo.lock) echo 'BLOCKED: Do not edit Cargo.lock directly. Use cargo add / cargo update instead.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ]
+}

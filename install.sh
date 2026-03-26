@@ -116,6 +116,10 @@ detect_profile() {
     detected="rust"
   elif [[ -f "go.mod" || -f "go.sum" ]]; then
     detected="go"
+  elif [[ -f "pom.xml" || -f "build.gradle" || -f "build.gradle.kts" ]]; then
+    detected="java"
+  elif [[ -f "composer.json" || -f "artisan" ]]; then
+    detected="php"
   elif [[ -f "Dockerfile" || -f "docker-compose.yml" || -f "terraform.tf" || -d ".terraform" || -f "Makefile" && -f "k8s" ]]; then
     detected="devops"
   elif [[ -f "Podfile" || -f "app.json" && -f "metro.config.js" || -f "pubspec.yaml" || -f "*.xcodeproj" ]]; then
@@ -165,10 +169,12 @@ if [[ -z "$PROFILE" && "$NO_PROMPT" == false ]]; then
   echo -e "  ${CYAN} 6)${NC} go              + go tools, golangci-lint, Go reviewer agent"
   echo -e "  ${CYAN} 7)${NC} devops          + Docker, K8s, Terraform, infra reviewer agent"
   echo -e "  ${CYAN} 8)${NC} data-science    + Jupyter, pandas, data analyst agent"
-  echo -e "  ${CYAN} 9)${NC} mobile          + React Native, Expo, Flutter, Xcode, Gradle"
-  echo -e "  ${CYAN}10)${NC} privacy-first   + Hardened security, no telemetry, credential lockdown"
+  echo -e "  ${CYAN} 9)${NC} java            + Maven/Gradle, Spring Boot, Java reviewer agent"
+  echo -e "  ${CYAN}10)${NC} php             + Composer, Laravel, Laravel reviewer agent"
+  echo -e "  ${CYAN}11)${NC} mobile          + React Native, Expo, Flutter, Xcode, Gradle"
+  echo -e "  ${CYAN}12)${NC} privacy-first   + Hardened security, no telemetry, credential lockdown"
   echo ""
-  read -p "  Pick a profile [1-10] (default: 1): " choice
+  read -p "  Pick a profile [1-12] (default: 1): " choice
   case "${choice:-1}" in
     1)  PROFILE="essential" ;;
     2)  PROFILE="web-dev" ;;
@@ -178,8 +184,10 @@ if [[ -z "$PROFILE" && "$NO_PROMPT" == false ]]; then
     6)  PROFILE="go" ;;
     7)  PROFILE="devops" ;;
     8)  PROFILE="data-science" ;;
-    9)  PROFILE="mobile" ;;
-    10) PROFILE="privacy-first" ;;
+    9)  PROFILE="java" ;;
+    10) PROFILE="php" ;;
+    11) PROFILE="mobile" ;;
+    12) PROFILE="privacy-first" ;;
     *)  PROFILE="essential" ;;
   esac
 fi
@@ -391,6 +399,16 @@ else
     go)
       echo -e "  ${CYAN}/plugin install go-review@claude-plugins-official${NC}"
       echo -e "    Go-specific code review (concurrency, error handling)"
+      echo ""
+      ;;
+    java)
+      echo -e "  ${CYAN}/plugin install java-review@claude-plugins-official${NC}"
+      echo -e "    Java/Spring Boot code review (DI, JPA, thread safety)"
+      echo ""
+      ;;
+    php)
+      echo -e "  ${CYAN}/plugin install laravel-review@claude-plugins-official${NC}"
+      echo -e "    Laravel/PHP code review (Eloquent, validation, queues)"
       echo ""
       ;;
   esac

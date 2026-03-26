@@ -1,0 +1,13 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.java) if [ -f './mvnw' ]; then ./mvnw spotless:apply -q 2>/dev/null || true; elif [ -f './gradlew' ]; then ./gradlew spotlessApply -q 2>/dev/null || true; fi;; esac"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.go) goimports -w \"$FILE\" 2>/dev/null || gofmt -w \"$FILE\" 2>/dev/null || true; go vet ./... 2>&1 | head -10 || true;; esac"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in go.sum) echo 'BLOCKED: Do not edit go.sum directly. Use go get / go mod tidy instead.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php *)",
+      "Bash(composer *)",
+      "Bash(artisan *)",
+      "Bash(php artisan *)",
+      "Bash(phpunit *)",
+      "Bash(./vendor/bin/*)",
+      "Bash(sail *)"
+    ]
+  }
+}

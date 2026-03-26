@@ -1,0 +1,24 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.py) python3 -m ruff check --fix \"$FILE\" 2>/dev/null || true;; esac"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in requirements.txt|poetry.lock|Pipfile.lock|uv.lock) echo 'BLOCKED: Do not edit lockfiles directly. Use pip install / poetry add / uv add instead.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ]
+}

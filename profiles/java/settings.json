@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn *)",
+      "Bash(gradle *)",
+      "Bash(./gradlew *)",
+      "Bash(./mvnw *)",
+      "Bash(java *)",
+      "Bash(javac *)"
+    ]
+  }
+}

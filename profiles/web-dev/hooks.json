@@ -1,0 +1,24 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.ts|*.tsx) npx --yes tsc --noEmit --pretty \"$FILE\" 2>&1 | head -20 || true;; esac"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in package-lock.json|yarn.lock|pnpm-lock.yaml|bun.lockb) echo 'BLOCKED: Do not edit lockfiles directly. Use npm install / yarn add / pnpm add instead.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ]
+}
