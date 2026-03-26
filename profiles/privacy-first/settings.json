@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(curl * | bash)",
+      "Bash(wget * | bash)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Read(~/.ssh/*)",
+      "Read(~/.aws/*)",
+      "Read(~/.gnupg/*)",
+      "Read(~/.config/gcloud/*)",
+      "Read(~/.kube/*)",
+      "Read(~/.docker/*)",
+      "Edit(~/.ssh/*)",
+      "Edit(~/.aws/*)",
+      "Edit(~/.gnupg/*)",
+      "Write(~/.ssh/*)",
+      "Write(~/.aws/*)",
+      "Write(~/.gnupg/*)"
+    ]
+  },
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_BUG_COMMAND": "1"
+  },
+  "preferences": {
+    "enableAllProjectMcpServers": false
+  }
+}

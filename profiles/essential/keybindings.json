@@ -1,0 +1,12 @@
+[
+  {
+    "key": "ctrl+g",
+    "action": "chat:externalEditor",
+    "description": "Open current prompt in $EDITOR for complex edits"
+  },
+  {
+    "key": "ctrl+x ctrl+k",
+    "action": "chat:killAgents",
+    "description": "Kill all running subagents (chord: Ctrl+X then Ctrl+K)"
+  }
+]

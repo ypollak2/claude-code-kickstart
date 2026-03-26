@@ -1,0 +1,52 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_TOOL_INPUT\" in *'rm -rf'*|*'rm -r /'*) echo 'BLOCKED: Destructive rm command. Use targeted deletion instead.' >&2; exit 2;; esac"
+        }
+      ]
+    },
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_TOOL_INPUT\" in *'git push'*main*'-f'*|*'git push'*main*'--force'*|*'git push'*master*'-f'*|*'git push'*master*'--force'*) echo 'BLOCKED: Force push to main/master. Use a feature branch.' >&2; exit 2;; esac"
+        }
+      ]
+    },
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "case \"$CLAUDE_FILE_PATH\" in *.env|*.env.*|*credentials*|*secrets*|*.pem|*.key) echo 'BLOCKED: Modifying sensitive file. Edit manually if needed.' >&2; exit 2;; esac"
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Edit|Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "FILE=\"$CLAUDE_FILE_PATH\"; case \"$FILE\" in *.js|*.jsx|*.ts|*.tsx|*.json|*.css|*.scss|*.md) npx --yes prettier --write \"$FILE\" 2>/dev/null || true;; *.py) python3 -m ruff format \"$FILE\" 2>/dev/null || python3 -m black \"$FILE\" 2>/dev/null || true;; *.go) goimports -w \"$FILE\" 2>/dev/null || gofmt -w \"$FILE\" 2>/dev/null || true;; esac"
+        }
+      ]
+    }
+  ],
+  "Notification": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "if command -v osascript &>/dev/null; then osascript -e \"display notification \\\"$CLAUDE_NOTIFICATION\\\" with title \\\"Claude Code\\\"\"; elif command -v notify-send &>/dev/null; then notify-send 'Claude Code' \"$CLAUDE_NOTIFICATION\"; fi"
+        }
+      ]
+    }
+  ]
+}

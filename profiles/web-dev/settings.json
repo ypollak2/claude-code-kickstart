@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(bun *)",
+      "Bash(tsc *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)",
+      "Bash(vitest *)",
+      "Bash(jest *)",
+      "Bash(playwright *)"
+    ]
+  }
+}

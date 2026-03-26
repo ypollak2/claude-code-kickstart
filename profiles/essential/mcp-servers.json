@@ -1,0 +1,17 @@
+{
+  "context7": {
+    "command": "npx",
+    "args": ["-y", "@upstash/context7-mcp@latest"],
+    "description": "Live library documentation — always up-to-date API references"
+  },
+  "playwright": {
+    "command": "npx",
+    "args": ["-y", "@anthropic-ai/mcp-server-playwright@latest"],
+    "description": "Browser automation via accessibility snapshots — web testing and scraping"
+  },
+  "sequential-thinking": {
+    "command": "npx",
+    "args": ["-y", "@anthropic-ai/mcp-server-sequential-thinking@latest"],
+    "description": "Structured multi-step reasoning for complex problem solving"
+  }
+}
