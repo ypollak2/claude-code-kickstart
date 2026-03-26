@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx *)",
+      "Bash(expo *)",
+      "Bash(react-native *)",
+      "Bash(xcodebuild *)",
+      "Bash(pod *)",
+      "Bash(gradle *)",
+      "Bash(adb *)",
+      "Bash(fastlane *)",
+      "Bash(flutter *)",
+      "Bash(dart *)",
+      "Bash(swift *)",
+      "Bash(swiftc *)"
+    ]
+  }
+}

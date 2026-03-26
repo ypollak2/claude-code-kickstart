@@ -66,32 +66,83 @@ Extended thinking (up to 32K tokens of internal reasoning) produces noticeably b
 
 ---
 
-## Agents: Why these 4?
+## Agents: Why these 11?
 
-### code-reviewer (read-only)
-The `disallowedTools: [Edit, Write]` constraint is critical. A reviewer that can modify code will be tempted to "fix" things instead of reporting them. Read-only keeps the review honest and safe.
+Agents split into two categories by design: **observers** and **actors**.
 
-### planner (no shell, no edits)
-Planning should be pure analysis. No shell access prevents the planner from "just quickly trying something." No edit access prevents premature implementation.
+### Observers (read-only — `disallowedTools: [Edit, Write]`)
 
-### security-auditor (read-only)
-Same principle as code-reviewer. Security analysis must be observational, not interventional.
+| Agent | Why read-only? |
+|-------|----------------|
+| **code-reviewer** | A reviewer that can modify code will "fix" things instead of reporting them. Read-only keeps reviews honest. |
+| **planner** | Planning should be pure analysis. No shell = no "just quickly trying something." No edits = no premature implementation. |
+| **security-auditor** | Security analysis must be observational. If it could edit, it might "fix" a vulnerability incorrectly and give false confidence. |
+| **pr-reviewer** | Same principle as code-reviewer, but for entire PRs. Reviews all commits, not just the last one. |
+| **performance-analyzer** | Finds bottlenecks without the temptation to optimize prematurely. Reports issues with evidence and estimated impact. |
+| **git-assistant** | Git operations are dangerous. This agent explains and suggests, but destructive commands require your explicit approval. |
 
-### debugger (full access)
-Debugging requires reproduction — running tests, adding print statements, trying fixes. This is the one agent that needs Edit and Bash access.
+### Actors (full access — can Edit, Write, Bash)
+
+| Agent | Why full access? |
+|-------|-----------------|
+| **debugger** | Debugging requires reproduction — running tests, adding print statements, trying fixes. |
+| **test-writer** | Needs to create test files, run the test suite, and iterate until tests pass. |
+| **refactorer** | Must edit code AND run tests before/after each change to verify no behavior change. |
+| **doc-writer** | Creates documentation files. Runs commands to verify code examples are accurate. |
+| **migrator** | Upgrades dependencies, modifies import statements, runs tests between each migration step. |
+| **api-designer** | Designs and implements API contracts — needs to write route definitions, schemas, and validation code. |
+
+### Model routing
+
+Agents that need deep reasoning (planner, migrator, api-designer) use **Opus**. Frequent-use agents (code-reviewer, debugger, test-writer) use **Sonnet** — 3x cheaper, fast enough for the task.
 
 ---
 
-## Shell aliases: Why these?
+## Profiles: Why these 10?
 
-### `cc` / `ccp` / `ccr`
-Just shorter. You'll type `claude` hundreds of times.
+### essential (everyone)
+The base layer. Hooks, agents, MCP servers, and settings that make Claude Code better regardless of your stack. Always installed first.
 
-### `ccreview` / `ccfix`
-The two most common one-shot commands. Review my changes, fix my tests. No need to type the full prompt every time.
+### web-dev / python / fullstack
+The most common stacks. These just add tool permissions — `Bash(npm *)`, `Bash(pytest *)`, etc. — so Claude can run your project's toolchain without asking permission each time.
 
-### `cce <file>`
-Explaining a file is the most common onboarding task. Making it a one-liner encourages the habit.
+### rust / go
+These include language-specific reviewer agents in addition to permissions. Rust and Go have unique patterns (ownership/lifetimes, goroutine safety) that generic code review misses.
 
-### `ccinit`
-Creates a starter CLAUDE.md in the current project. The template has sections but no content — you fill in your project specifics. This is better than Claude guessing your architecture.
+### devops
+The only profile with **deny rules for destructive operations**. `terraform apply`, `kubectl delete`, `docker system prune` are blocked. Claude can plan and validate, but you pull the trigger on infrastructure changes.
+
+### data-science
+Includes a data analyst agent that enforces statistical rigor — null hypotheses, confidence intervals, reproducible seeds. Prevents the "correlation = causation" mistakes that AI assistants often make.
+
+### mobile
+Covers the fragmented mobile toolchain — React Native, Expo, Flutter, Xcode, Gradle, CocoaPods, ADB. No custom agent needed; mobile development is more about permissions than analysis patterns.
+
+### privacy-first
+Trail of Bits-inspired lockdown. Denies access to `~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.kube`, `~/.docker`. Disables all telemetry. For people working on sensitive codebases or in regulated industries.
+
+---
+
+## Shell tooling: Why these commands?
+
+### Core aliases (`cc`, `ccp`, `ccr`)
+You'll type `claude` hundreds of times. `cc` saves 4 characters each time.
+
+### Code operations (`ccreview`, `ccfix`, `cctest`, `ccrefactor`)
+The four most common one-shot workflows. Each encodes a best practice:
+- `ccreview` reviews the git diff, not the whole codebase
+- `ccfix` finds failures AND confirms the fix, not just patches blindly
+- `cctest` asks for happy path, edge cases, AND error handling
+- `ccrefactor` runs tests before and after — the cardinal rule of refactoring
+
+### Git helpers (`ccpr`, `ccrebase`, `ccbisect`)
+Git operations people do rarely enough to forget the syntax. `ccpr 42` is faster than remembering `gh pr diff` + `gh pr view` + manual review. `ccbisect` automates the most tedious debugging technique.
+
+### Project setup (`ccinit`, `ccscan`)
+Two approaches: `ccinit` gives you an empty template to fill in (good for new projects). `ccscan` uses Claude to auto-detect your stack and generate a CLAUDE.md (good for existing projects you're onboarding to).
+
+### Maintenance (`cchealth`, `ccupdate`)
+`cchealth` is the "did it actually install correctly?" command. Shows settings, hooks, agents, MCP servers, and privacy status in one glance. `ccupdate` pulls the latest configs from this repo.
+
+### Tab completion
+File-based commands (`cce`, `ccrf`, `cctest`, `ccrefactor`) have tab completion for both zsh and bash. No configuration needed — it's included automatically.

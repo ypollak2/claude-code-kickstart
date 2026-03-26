@@ -38,14 +38,24 @@ Every MCP server eats context tokens just to exist. We picked the 3 that earn th
 | **Block sensitive files** | Stops Claude from editing .env, credentials, private keys. |
 | **Desktop notifications** | Get notified when long tasks finish (macOS + Linux). |
 
-### 4 Purpose-Built Agents
+### 11 Purpose-Built Agents
 
 | Agent | Model | Access | Purpose |
 |-------|-------|--------|---------|
-| **code-reviewer** | Sonnet | Read-only | Finds bugs, security issues, and quality problems. Can't "fix" things — keeps reviews honest. |
-| **planner** | Opus | Read-only | Creates implementation plans. No shell = no premature coding. |
-| **security-auditor** | Sonnet | Read-only | OWASP Top 10, secrets scanning, dependency checks. |
-| **debugger** | Sonnet | Full | Reproduces, isolates, and fixes bugs systematically. |
+| **code-reviewer** | Sonnet | Read-only | Finds bugs, security issues, quality problems |
+| **planner** | Opus | Read-only | Creates implementation plans without premature coding |
+| **security-auditor** | Sonnet | Read-only | OWASP Top 10, secrets scanning, dependency checks |
+| **debugger** | Sonnet | Full | Reproduces, isolates, and fixes bugs systematically |
+| **test-writer** | Sonnet | Full | Writes comprehensive tests — happy path, edge cases, errors |
+| **refactorer** | Sonnet | Full | Improves code structure — always runs tests before/after |
+| **doc-writer** | Sonnet | Full | Generates docs by reading code, not by guessing |
+| **pr-reviewer** | Sonnet | Read-only | Reviews entire PRs — all commits, tests, design |
+| **performance-analyzer** | Sonnet | Read-only | Finds N+1 queries, memory leaks, unnecessary re-renders |
+| **migrator** | Opus | Full | Upgrades dependencies and migrates frameworks safely |
+| **git-assistant** | Sonnet | Read-only | Complex git ops — rebasing, conflict resolution, bisect |
+| **api-designer** | Opus | Full | Designs consistent REST/GraphQL APIs with proper contracts |
+
+Profile-specific agents are also included (Rust reviewer, Go reviewer, infra reviewer, data analyst).
 
 ### Privacy-Respecting Defaults
 
@@ -57,14 +67,37 @@ Every MCP server eats context tokens just to exist. We picked the 3 that earn th
 ### Shell Integration
 
 ```bash
-cc          # Short for 'claude'
-ccp         # Plan mode
-ccr         # Resume last session
-ccreview    # Review current git diff
-ccfix       # Find and fix failing tests
-cce <file>  # Explain a file
-ccinit      # Create starter CLAUDE.md for current project
+# Core
+cc                  # Short for 'claude'
+ccp                 # Plan mode
+ccr                 # Resume last session
+
+# Code operations
+ccreview            # Review current git diff
+ccfix               # Find and fix failing tests
+cctest <file>       # Write tests for a file
+ccrefactor <file>   # Refactor a file safely
+cce <file>          # Explain a file
+ccrf <file>         # Review a specific file
+ccq 'question'      # Quick one-shot question
+
+# Git helpers
+cccommit            # Smart commit message
+ccpr <number>       # Review a PR by number
+ccrebase            # Interactive rebase help
+ccbisect 'what broke'  # Find the breaking commit
+
+# Project setup
+ccinit              # Create starter CLAUDE.md
+ccscan              # Auto-generate CLAUDE.md by scanning the project
+
+# Maintenance
+cchealth            # Health check — verify your setup is working
+ccupdate            # Pull latest kickstart configs
+ccsessions          # List recent Claude sessions
 ```
+
+Tab completion included for zsh and bash.
 
 ---
 
@@ -75,12 +108,28 @@ Pick a profile during install, or pass `--profile <name>`:
 | Profile | What it adds |
 |---------|-------------|
 | **essential** | Everything above. Start here. |
-| **web-dev** | + npm/yarn/pnpm/bun, vitest/jest, Playwright, ESLint, Prettier permissions |
-| **python** | + python/pip/uv/poetry, pytest, ruff/black/mypy permissions |
+| **web-dev** | + npm/yarn/pnpm/bun, vitest/jest, Playwright, ESLint, Prettier |
+| **python** | + python/pip/uv/poetry, pytest, ruff/black/mypy |
 | **fullstack** | + Both web-dev and python |
-| **privacy-first** | + Hardened credential lockdown, all telemetry disabled, strictest permissions |
+| **rust** | + cargo/clippy/rustfmt, **Rust reviewer agent** |
+| **go** | + go tools/golangci-lint, **Go reviewer agent** |
+| **devops** | + Docker/K8s/Terraform/Helm, **infra reviewer agent**, destructive ops blocked |
+| **data-science** | + jupyter/pandas/DVC, **data analyst agent** |
+| **mobile** | + React Native/Expo/Flutter/Xcode/Gradle |
+| **privacy-first** | + Hardened credential lockdown, all telemetry disabled |
 
 Profiles **stack**: essential is always the base, your chosen profile adds on top.
+
+### Auto-detect
+
+Don't know which profile? Let the installer figure it out:
+
+```bash
+cd your-project
+/path/to/claude-code-kickstart/install.sh --auto
+```
+
+It reads `package.json`, `Cargo.toml`, `go.mod`, `requirements.txt`, `Dockerfile`, etc. to suggest the right profile.
 
 ---
 
@@ -90,8 +139,11 @@ Profiles **stack**: essential is always the base, your chosen profile adds on to
 # Interactive (recommended for first time)
 ./install.sh
 
+# Auto-detect project type
+./install.sh --auto
+
 # Non-interactive with specific profile
-./install.sh --profile web-dev --no-prompt
+./install.sh --profile rust --no-prompt
 
 # Preview without making changes
 ./install.sh --dry-run
@@ -103,11 +155,9 @@ Profiles **stack**: essential is always the base, your chosen profile adds on to
 ./uninstall.sh
 ```
 
----
+### Post-install
 
-## Recommended Plugins
-
-After installing, open Claude Code and run these:
+After installing, open Claude Code and install the recommended plugins:
 
 ```
 /plugin install feature-dev@claude-plugins-official
@@ -115,7 +165,7 @@ After installing, open Claude Code and run these:
 /plugin install hookify@claude-plugins-official
 ```
 
-These aren't auto-installed because plugins require an active Claude Code session.
+Then run `cchealth` to verify everything is working.
 
 ---
 
@@ -123,36 +173,54 @@ These aren't auto-installed because plugins require an active Claude Code sessio
 
 ```
 claude-code-kickstart/
-├── install.sh                    # One command setup
-├── uninstall.sh                  # Clean removal
+├── install.sh                        # One command setup with auto-detect
+├── uninstall.sh                      # Clean removal with backup restore
 ├── profiles/
-│   ├── essential/                # Base config (always installed)
-│   │   ├── settings.json         # Permissions, privacy, thinking
-│   │   ├── hooks.json            # Auto-format, safety guards
-│   │   ├── keybindings.json      # Power user shortcuts
-│   │   ├── mcp-servers.json      # Context7, Playwright, Sequential Thinking
-│   │   ├── CLAUDE.md             # Starter template
-│   │   └── agents/               # code-reviewer, planner, security-auditor, debugger
-│   ├── web-dev/                  # JS/TS ecosystem permissions
-│   ├── python/                   # Python ecosystem permissions
-│   ├── fullstack/                # Both
-│   └── privacy-first/            # Hardened security
+│   ├── essential/                    # Base config (always installed)
+│   │   ├── settings.json             # Permissions, privacy, thinking
+│   │   ├── hooks.json                # Auto-format, safety guards
+│   │   ├── keybindings.json          # Power user shortcuts
+│   │   ├── mcp-servers.json          # Context7, Playwright, Sequential Thinking
+│   │   ├── CLAUDE.md                 # Starter template
+│   │   └── agents/                   # 11 purpose-built agents
+│   │       ├── code-reviewer.md
+│   │       ├── planner.md
+│   │       ├── security-auditor.md
+│   │       ├── debugger.md
+│   │       ├── test-writer.md
+│   │       ├── refactorer.md
+│   │       ├── doc-writer.md
+│   │       ├── pr-reviewer.md
+│   │       ├── performance-analyzer.md
+│   │       ├── migrator.md
+│   │       ├── git-assistant.md
+│   │       └── api-designer.md
+│   ├── web-dev/                      # JS/TS ecosystem
+│   ├── python/                       # Python ecosystem
+│   ├── fullstack/                    # Both
+│   ├── rust/                         # Cargo + Rust reviewer agent
+│   ├── go/                           # Go tools + Go reviewer agent
+│   ├── devops/                       # Docker/K8s/Terraform + infra reviewer
+│   ├── data-science/                 # Jupyter/pandas + data analyst agent
+│   ├── mobile/                       # React Native/Flutter/Xcode
+│   └── privacy-first/                # Hardened security
 ├── shell/
-│   └── aliases.sh                # cc, ccreview, ccfix, ccinit
+│   └── aliases.sh                    # 20+ commands with tab completion
 └── docs/
-    ├── WHY.md                    # Why every choice was made
-    └── CUSTOMIZE.md              # How to modify for your needs
+    ├── WHY.md                        # Why every choice was made
+    └── CUSTOMIZE.md                  # How to modify for your needs
 ```
 
 ---
 
 ## Philosophy
 
-1. **Opinionated > comprehensive.** We pick the best 5 things, not list 200.
+1. **Opinionated > comprehensive.** We pick the best things, not list everything.
 2. **Explain every choice.** Read [WHY.md](docs/WHY.md) to understand the reasoning.
 3. **Safe defaults.** Privacy on, destructive commands blocked, credentials protected.
 4. **Easy to undo.** Automatic backup on install, clean uninstall script.
 5. **Profiles, not forks.** One repo that adapts to your stack.
+6. **Verify your setup.** `cchealth` tells you exactly what's working and what's not.
 
 ---
 
@@ -167,7 +235,7 @@ claude-code-kickstart/
 
 ## Contributing
 
-Found a hook that changed your workflow? An agent prompt that's unusually effective? PRs welcome — but remember the philosophy: every addition must earn its place. We'd rather have 5 great things than 50 mediocre ones.
+Found a hook that changed your workflow? An agent prompt that's unusually effective? PRs welcome — but remember the philosophy: every addition must earn its place. We'd rather have 10 great things than 50 mediocre ones.
 
 ---
 

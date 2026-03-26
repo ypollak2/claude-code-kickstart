@@ -41,11 +41,16 @@ SKIP_PLUGINS=false
 SKIP_MCP=false
 SKIP_SHELL=false
 
+AUTO_DETECT=false
+
 usage() {
   echo "Usage: ./install.sh [OPTIONS]"
   echo ""
   echo "Options:"
-  echo "  --profile <name>    Profile to install (essential|web-dev|python|fullstack|privacy-first)"
+  echo "  --profile <name>    Profile to install:"
+  echo "                        essential, web-dev, python, fullstack, privacy-first,"
+  echo "                        rust, go, devops, data-science, mobile"
+  echo "  --auto              Auto-detect project type from current directory"
   echo "  --no-prompt         Skip interactive prompts, use defaults"
   echo "  --dry-run           Show what would be installed without making changes"
   echo "  --skip-plugins      Skip plugin installation"
@@ -63,12 +68,13 @@ while [[ $# -gt 0 ]]; do
     --skip-plugins) SKIP_PLUGINS=true; shift ;;
     --skip-mcp)    SKIP_MCP=true; shift ;;
     --skip-shell)  SKIP_SHELL=true; shift ;;
+    --auto)        AUTO_DETECT=true; shift ;;
     -h|--help)     usage ;;
     *)             error "Unknown option: $1"; usage ;;
   esac
 done
 
-TOTAL_STEPS=7
+TOTAL_STEPS=8
 
 # ─── Pre-flight checks ───────────────────────────────────────────
 
@@ -101,24 +107,80 @@ success "jq available"
 
 step 2 "Profile selection"
 
+# ─── Auto-detect project type ─────────────────────────────────────
+detect_profile() {
+  local detected=""
+
+  # Check for language-specific files in current directory
+  if [[ -f "Cargo.toml" || -f "Cargo.lock" ]]; then
+    detected="rust"
+  elif [[ -f "go.mod" || -f "go.sum" ]]; then
+    detected="go"
+  elif [[ -f "Dockerfile" || -f "docker-compose.yml" || -f "terraform.tf" || -d ".terraform" || -f "Makefile" && -f "k8s" ]]; then
+    detected="devops"
+  elif [[ -f "Podfile" || -f "app.json" && -f "metro.config.js" || -f "pubspec.yaml" || -f "*.xcodeproj" ]]; then
+    detected="mobile"
+  elif [[ -f "package.json" && -f "requirements.txt" ]] || [[ -f "package.json" && -f "pyproject.toml" ]]; then
+    detected="fullstack"
+  elif [[ -f "package.json" || -f "tsconfig.json" || -f "next.config.js" || -f "next.config.ts" || -f "vite.config.ts" ]]; then
+    detected="web-dev"
+  elif [[ -f "setup.py" || -f "pyproject.toml" || -f "requirements.txt" || -f "Pipfile" ]]; then
+    # Check if it looks like data science
+    if [[ -d "notebooks" || -f "*.ipynb" ]] || grep -q "pandas\|numpy\|scikit\|torch\|tensorflow\|jupyter" requirements.txt 2>/dev/null || grep -q "pandas\|numpy\|scikit\|torch\|tensorflow\|jupyter" pyproject.toml 2>/dev/null; then
+      detected="data-science"
+    else
+      detected="python"
+    fi
+  fi
+
+  echo "$detected"
+}
+
+if [[ "$AUTO_DETECT" == true && -z "$PROFILE" ]]; then
+  DETECTED=$(detect_profile)
+  if [[ -n "$DETECTED" ]]; then
+    info "Auto-detected project type: ${BOLD}$DETECTED${NC}"
+    if [[ "$NO_PROMPT" == true ]]; then
+      PROFILE="$DETECTED"
+    else
+      read -p "  Use detected profile '$DETECTED'? [Y/n]: " use_detected
+      if [[ "${use_detected:-Y}" =~ ^[Yy]$ ]]; then
+        PROFILE="$DETECTED"
+      fi
+    fi
+  else
+    info "Could not auto-detect project type — falling back to manual selection"
+  fi
+fi
+
 if [[ -z "$PROFILE" && "$NO_PROMPT" == false ]]; then
   echo ""
   echo -e "  ${BOLD}Available profiles:${NC}"
   echo ""
-  echo -e "  ${CYAN}1)${NC} essential       Core setup everyone should have (recommended start)"
-  echo -e "  ${CYAN}2)${NC} web-dev         + React, Next.js, Node.js, Tailwind tools"
-  echo -e "  ${CYAN}3)${NC} python          + Python, FastAPI, Django, pytest tools"
-  echo -e "  ${CYAN}4)${NC} fullstack       + Both web-dev and python"
-  echo -e "  ${CYAN}5)${NC} privacy-first   + Hardened security, no telemetry, credential lockdown"
+  echo -e "  ${CYAN} 1)${NC} essential       Core setup everyone should have (recommended start)"
+  echo -e "  ${CYAN} 2)${NC} web-dev         + React, Next.js, Node.js, Tailwind tools"
+  echo -e "  ${CYAN} 3)${NC} python          + Python, FastAPI, Django, pytest tools"
+  echo -e "  ${CYAN} 4)${NC} fullstack       + Both web-dev and python"
+  echo -e "  ${CYAN} 5)${NC} rust            + Cargo, clippy, rustfmt, Rust reviewer agent"
+  echo -e "  ${CYAN} 6)${NC} go              + go tools, golangci-lint, Go reviewer agent"
+  echo -e "  ${CYAN} 7)${NC} devops          + Docker, K8s, Terraform, infra reviewer agent"
+  echo -e "  ${CYAN} 8)${NC} data-science    + Jupyter, pandas, data analyst agent"
+  echo -e "  ${CYAN} 9)${NC} mobile          + React Native, Expo, Flutter, Xcode, Gradle"
+  echo -e "  ${CYAN}10)${NC} privacy-first   + Hardened security, no telemetry, credential lockdown"
   echo ""
-  read -p "  Pick a profile [1-5] (default: 1): " choice
+  read -p "  Pick a profile [1-10] (default: 1): " choice
   case "${choice:-1}" in
-    1) PROFILE="essential" ;;
-    2) PROFILE="web-dev" ;;
-    3) PROFILE="python" ;;
-    4) PROFILE="fullstack" ;;
-    5) PROFILE="privacy-first" ;;
-    *) PROFILE="essential" ;;
+    1)  PROFILE="essential" ;;
+    2)  PROFILE="web-dev" ;;
+    3)  PROFILE="python" ;;
+    4)  PROFILE="fullstack" ;;
+    5)  PROFILE="rust" ;;
+    6)  PROFILE="go" ;;
+    7)  PROFILE="devops" ;;
+    8)  PROFILE="data-science" ;;
+    9)  PROFILE="mobile" ;;
+    10) PROFILE="privacy-first" ;;
+    *)  PROFILE="essential" ;;
   esac
 fi
 
@@ -310,17 +372,28 @@ else
   echo -e "    Auto-generates hooks by analyzing your workflow"
   echo ""
 
-  if [[ "$PROFILE" == "web-dev" || "$PROFILE" == "fullstack" ]]; then
-    echo -e "  ${CYAN}/plugin install frontend-design@claude-plugins-official${NC}"
-    echo -e "    High-quality frontend interface generation"
-    echo ""
-  fi
-
-  if [[ "$PROFILE" == "python" || "$PROFILE" == "fullstack" ]]; then
-    echo -e "  ${CYAN}/plugin install python-review@claude-plugins-official${NC}"
-    echo -e "    Python-specific code review (PEP 8, type hints, security)"
-    echo ""
-  fi
+  case "$PROFILE" in
+    web-dev|fullstack)
+      echo -e "  ${CYAN}/plugin install frontend-design@claude-plugins-official${NC}"
+      echo -e "    High-quality frontend interface generation"
+      echo ""
+      ;;&
+    python|fullstack|data-science)
+      echo -e "  ${CYAN}/plugin install python-review@claude-plugins-official${NC}"
+      echo -e "    Python-specific code review (PEP 8, type hints, security)"
+      echo ""
+      ;;
+    rust)
+      echo -e "  ${CYAN}/plugin install rust-review@claude-plugins-official${NC}"
+      echo -e "    Rust-specific code review (ownership, lifetimes, unsafe)"
+      echo ""
+      ;;
+    go)
+      echo -e "  ${CYAN}/plugin install go-review@claude-plugins-official${NC}"
+      echo -e "    Go-specific code review (concurrency, error handling)"
+      echo ""
+      ;;
+  esac
 
   info "Run these commands inside a Claude Code session to install."
 fi
@@ -370,6 +443,41 @@ else
   fi
 fi
 
+# ─── Health check ─────────────────────────────────────────────────
+
+step 8 "Verifying installation"
+
+verify_item() {
+  local label="$1"
+  local check="$2"
+  if eval "$check" &>/dev/null; then
+    success "$label"
+  else
+    warn "$label"
+  fi
+}
+
+if [[ "$DRY_RUN" != true ]]; then
+  verify_item "settings.json exists" "[[ -f '$CLAUDE_DIR/settings.json' ]]"
+  verify_item "Hooks configured" "jq -e '.hooks' '$CLAUDE_DIR/settings.json'"
+
+  if [[ -d "$CLAUDE_DIR/agents" ]]; then
+    local agent_count
+    agent_count=$(ls "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
+    success "$agent_count agents installed"
+  fi
+
+  if [[ -f "$CLAUDE_DIR/mcp-servers.json" ]]; then
+    local mcp_count
+    mcp_count=$(jq 'keys | length' "$CLAUDE_DIR/mcp-servers.json" 2>/dev/null || echo 0)
+    success "$mcp_count MCP servers configured"
+  fi
+
+  verify_item "Keybindings configured" "[[ -f '$CLAUDE_DIR/keybindings.json' ]]"
+else
+  info "[DRY RUN] Would verify installation"
+fi
+
 # ─── Summary ──────────────────────────────────────────────────────
 
 echo ""
@@ -390,8 +498,17 @@ echo ""
 echo -e "  ${BOLD}Next steps:${NC}"
 echo -e "    1. Open Claude Code and install recommended plugins (see above)"
 echo -e "    2. Run ${CYAN}claude${NC} to start using your new setup"
-echo -e "    3. Read docs/WHY.md to understand each choice"
-echo -e "    4. Edit docs/CUSTOMIZE.md to tweak for your needs"
+echo -e "    3. Run ${CYAN}cchealth${NC} anytime to check your setup"
+echo -e "    4. Run ${CYAN}ccupdate${NC} to pull the latest configs"
+echo -e "    5. Read docs/WHY.md to understand each choice"
+echo ""
+echo -e "  ${BOLD}Useful commands:${NC}"
+echo -e "    ${CYAN}cc${NC}          Start Claude Code"
+echo -e "    ${CYAN}ccreview${NC}    Review your current changes"
+echo -e "    ${CYAN}ccfix${NC}       Find and fix failing tests"
+echo -e "    ${CYAN}cctest${NC}      Write tests for a file"
+echo -e "    ${CYAN}cchealth${NC}    Check installation health"
+echo -e "    ${CYAN}ccscan${NC}      Auto-generate CLAUDE.md for a project"
 echo ""
 echo -e "  ${BOLD}To undo:${NC}  ./uninstall.sh  or  restore from $BACKUP_DIR"
 echo ""
